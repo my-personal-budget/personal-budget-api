@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# Enable CGO for SQLite
+export CGO_ENABLED=1
+
 # Ensure Go is installed
 if ! command -v go &> /dev/null; then
     echo "Go is not installed. Please install Go first."
