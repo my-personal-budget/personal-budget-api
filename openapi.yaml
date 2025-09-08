@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: Personal Budget API
+  version: 1.0.0
+paths:
+  /budget:
+    get:
+      summary: List all budgets
+      responses:
+        '200':
+          description: A list of budgets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Budget'
+    post:
+      summary: Create a new budget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Budget'
+      responses:
+        '201':
+          description: Budget created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+  /budget/{id}:
+    put:
+      summary: Update a budget by ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: UUID of the budget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Budget'
+      responses:
+        '200':
+          description: Budget updated successfully
+    delete:
+      summary: Delete a budget by ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: UUID of the budget
+      responses:
+        '204':
+          description: Budget deleted successfully
+
+components:
+  schemas:
+    Budget:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        month:
+          type: string
+          example: "2025-09"
+        category:
+          type: string
+          example: "Groceries"
+        budget:
+          type: integer
+          example: 150
+      required:
+        - month
+        - category
+        - budget
+
