@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/pedrompeixoto/person-budget-api/store"
 	"github.com/pedrompeixoto/person-budget-api/internal/budget"
+	"github.com/pedrompeixoto/person-budget-api/store"
 )
 
 func main() {
@@ -18,6 +18,12 @@ func main() {
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
+
+	http.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "openapi.yaml")
+	})
+	fs := http.FileServer(http.Dir("./swagger-ui"))
+	http.Handle("/swagger-ui/", http.StripPrefix("/swagger-ui/", fs))
 
 	// mount the budget handler
 	budgetHandler := budget.NewBudgetHandler(pbStore)
