@@ -2,16 +2,26 @@ package budget
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/pedrompeixoto/person-budget-api/store"
 )
 
 type Budget struct {
-    ID       string    `json:"id"`
-    Month    string `json:"month"`    // e.g., "2025-09"
-    Category string `json:"category"` // e.g., "Groceries"
-    Budget   int    `json:"budget"`   // amount in integer
+	ID         string    `db:"id" json:"id"`
+	Month      time.Time `db:"month" json:"month"`             // first day of month
+	CategoryID int       `db:"category_id" json:"category_id"` // FK to categories
+	Budget     float64   `db:"budget" json:"budget"`
+	CreatedAt  time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt  time.Time `db:"updated_at" json:"updated_at"`
+}
+
+type CreateBudgetBody struct {
+	Month      time.Time `json:"month"`
+	CategoryID int       `json:"categoryId"`
+	Budget     float64   `json:"budget"`
 }
 
 type BudgetHandler struct {
@@ -42,23 +52,31 @@ func (h *BudgetHandler) get(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (h *BudgetHandler) create(w http.ResponseWriter, r *http.Request) {
-    var b Budget
-    if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
-        http.Error(w, "invalid request body", http.StatusBadRequest)
-        return
-    }
+	var body CreateBudgetBody
 
-    id, err := h.store.CreateBudget(b.Month, b.Category, b.Budget)
-    if err != nil {
-        http.Error(w, "failed to create budget", http.StatusInternalServerError)
-        return
-    }
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
 
-    b.ID = id
+	id, err := h.store.CreateBudget(body.Month, body.CategoryID, body.Budget)
+	if err != nil {
+		http.Error(w, "failed to create budget", http.StatusInternalServerError)
+		return
+	}
 
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(b)
+	b := Budget{
+		ID:         id,
+		Month:      body.Month,
+		CategoryID: body.CategoryID,
+		Budget:     body.Budget,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(b)
 }
 
 func (h *BudgetHandler) update(w http.ResponseWriter, _ *http.Request) {
@@ -68,4 +86,3 @@ func (h *BudgetHandler) update(w http.ResponseWriter, _ *http.Request) {
 func (h *BudgetHandler) delete(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("DELETE budget"))
 }
-

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS Category (
 
 -- Budget table with DATE for month
 CREATE TABLE IF NOT EXISTS Budget (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     month DATE NOT NULL,             -- first day of month, e.g., '2025-01-01'
     category_id INTEGER NOT NULL,  -- FK to categories
     budget REAL NOT NULL,
