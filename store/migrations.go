@@ -2,11 +2,11 @@ package store
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
-	"log"
 	"time"
 )
 
@@ -15,7 +15,7 @@ func CreateMigration(name string) {
 
 	if _, err := os.Stat(migrationsDir); os.IsNotExist(err) {
 		if err := os.Mkdir(migrationsDir, 0755); err != nil {
-			log.Fatalf("failed to create migrations directory: %w", err)
+			fmt.Println("failed to create migrations directory: %w", err)
 			return
 		}
 	}
@@ -26,16 +26,17 @@ func CreateMigration(name string) {
 	migrationFileName := filepath.Join(migrationsDir, fileNameWithoutExtension+".sql")
 
 	if err := os.WriteFile(migrationFileName, []byte("-- Write your migration here\n"), 0644); err != nil {
-		log.Fatalf("failed to create up migration: %w", err)
+		fmt.Println("failed to create up migration: %w", err)
 		return
 	}
 
 	log.Println("Created migration files: " + migrationFileName)
-	return 
+	return
 }
 
-// Migrate applies all pending SQL migrations in ./migrations
 func Migrate(s *Store) error {
+	log.Println("Running migrations")
+
 	// Ensure schema_migrations table exists
 	_, err := s.DB.Exec(`
 		CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -67,7 +68,7 @@ func Migrate(s *Store) error {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Println("No migrations directory found, skipping.")
+			log.Println("No migrations directory found, skipping.")
 			return nil
 		}
 		return fmt.Errorf("failed to read migrations dir: %w", err)
@@ -82,6 +83,16 @@ func Migrate(s *Store) error {
 
 	// Sort migrations by filename (timestamp prefix)
 	sort.Strings(files)
+
+	// Print all migration files
+	log.Println("Migration files found:")
+	for _, f := range files {
+		status := "pending"
+		if applied[f] {
+			status = "applied"
+		}
+		log.Printf("  %s [%s]", f, status)
+	}
 
 	// Apply new migrations
 	for _, f := range files {
@@ -116,9 +127,9 @@ func Migrate(s *Store) error {
 			return fmt.Errorf("failed to commit migration %s: %w", f, err)
 		}
 
-		fmt.Printf("Applied migration: %s\n", f)
+		log.Printf("Applied migration: %s", f)
 	}
 
-	fmt.Println("All migrations applied successfully.")
+	log.Println("All migrations applied successfully.")
 	return nil
 }

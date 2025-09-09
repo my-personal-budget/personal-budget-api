@@ -69,7 +69,9 @@ func handleMigrate(args []string, pbStore *store.Store) {
 		}
 		store.CreateMigration(args[1])
 	case "run":
-		store.Migrate(pbStore)
+		if err := store.Migrate(pbStore); err != nil {
+			log.Fatal(err)
+		}
 	default:
 		log.Fatalf("unknown migrate subcommand: %s", args[0])
 	}
