@@ -24,4 +24,4 @@ fi
 
 # Run air
 echo "Starting air..."
-air
+air start
