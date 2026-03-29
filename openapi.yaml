@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: Budget API
+  version: 1.0.0
+
+paths:
+  /budgets:
+    post:
+      summary: Create a new budget
+      operationId: createBudget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBudgetBody'
+      responses:
+        '201':
+          description: Budget successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+        '400':
+          description: Invalid request body
+        '500':
+          description: Failed to create budget
+
+components:
+  schemas:
+    Budget:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        month:
+          type: string
+          format: date
+          example: "2025-09-01"
+        category_id:
+          type: integer
+          example: 2
+        budget:
+          type: number
+          format: double
+          example: 1500.50
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-09-10T12:34:56Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-09-10T12:34:56Z"
+      required:
+        - id
+        - month
+        - category_id
+        - budget
+        - created_at
+        - updated_at
+
+    CreateBudgetBody:
+      type: object
+      properties:
+        month:
+          type: string
+          format: date
+          example: "2025-09-01"
+        categoryId:
+          type: integer
+          example: 2
+        budget:
+          type: number
+          format: double
+          example: 1500.50
+      required:
+        - month
+        - categoryId
+        - budget
